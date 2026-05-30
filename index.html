@@ -1,91 +1,13 @@
-
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--font-sans); }
-#app { padding: 1rem 0; }
-.tabs { display: flex; gap: 4px; margin-bottom: 1.5rem; border-bottom: 0.5px solid var(--color-border-tertiary); padding-bottom: 0; }
-.tab { background: none; border: none; font-size: 13px; color: var(--color-text-secondary); padding: 8px 16px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -0.5px; font-family: var(--font-sans); transition: color 0.15s; }
-.tab.active { color: var(--color-text-primary); border-bottom-color: var(--color-text-primary); font-weight: 500; }
-.tab:hover:not(.active) { color: var(--color-text-primary); }
-
-/* Timer */
-.timer-section { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start; }
-.timer-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.5rem; text-align: center; }
-.timer-display { font-size: 56px; font-weight: 500; letter-spacing: -2px; color: var(--color-text-primary); font-variant-numeric: tabular-nums; margin: 1rem 0; }
-.timer-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--color-text-tertiary); margin-bottom: 0.5rem; }
-.mode-btns { display: flex; gap: 6px; justify-content: center; margin-bottom: 1rem; }
-.mode-btn { background: none; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 4px 10px; font-size: 12px; cursor: pointer; color: var(--color-text-secondary); font-family: var(--font-sans); transition: all 0.1s; }
-.mode-btn.active { background: var(--color-background-secondary); color: var(--color-text-primary); border-color: var(--color-border-primary); }
-.timer-controls { display: flex; gap: 8px; justify-content: center; margin-top: 1rem; }
-.btn-main { background: var(--color-text-primary); color: var(--color-background-primary); border: none; border-radius: var(--border-radius-md); padding: 10px 28px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: var(--font-sans); transition: opacity 0.1s; }
-.btn-main:hover { opacity: 0.85; }
-.btn-sec { background: none; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 10px 16px; font-size: 14px; cursor: pointer; color: var(--color-text-secondary); font-family: var(--font-sans); }
-.btn-sec:hover { background: var(--color-background-secondary); }
-.project-select-wrap { margin-top: 1rem; }
-.project-select-wrap label { font-size: 12px; color: var(--color-text-secondary); display: block; margin-bottom: 4px; text-align: left; }
-select { width: 100%; font-family: var(--font-sans); font-size: 13px; }
-.session-note-wrap { margin-top: 0.75rem; }
-.session-note-wrap label { font-size: 12px; color: var(--color-text-secondary); display: block; margin-bottom: 4px; text-align: left; }
-input[type="text"] { width: 100%; font-family: var(--font-sans); font-size: 13px; }
-.pomodoro-count { display: flex; gap: 6px; justify-content: center; margin-top: 1rem; flex-wrap: wrap; }
-.pom-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--color-border-secondary); }
-.pom-dot.done { background: #D85A30; }
-
-/* Projects panel */
-.projects-panel { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.25rem; }
-.panel-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 1rem; }
-.project-list { display: flex; flex-direction: column; gap: 6px; max-height: 320px; overflow-y: auto; }
-.project-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); cursor: pointer; transition: background 0.1s; }
-.project-item:hover { background: var(--color-background-secondary); }
-.project-item.selected { border-color: var(--color-border-primary); background: var(--color-background-secondary); }
-.project-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.project-name { font-size: 13px; color: var(--color-text-primary); flex: 1; }
-.project-poms { font-size: 11px; color: var(--color-text-tertiary); }
-.add-project { display: flex; gap: 6px; margin-top: 0.75rem; }
-.add-project input { flex: 1; font-size: 13px; }
-.btn-add { background: none; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 6px 12px; font-size: 13px; cursor: pointer; color: var(--color-text-secondary); font-family: var(--font-sans); white-space: nowrap; }
-.btn-add:hover { background: var(--color-background-secondary); }
-
-/* Stats */
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
-.metric-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 1rem; }
-.metric-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
-.metric-value { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
-.metric-sub { font-size: 11px; color: var(--color-text-tertiary); margin-top: 2px; }
-.section-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 0.75rem; }
-.bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-.bar-name { font-size: 12px; color: var(--color-text-secondary); width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
-.bar-track { flex: 1; height: 6px; background: var(--color-background-secondary); border-radius: 3px; overflow: hidden; }
-.bar-fill { height: 100%; border-radius: 3px; background: #D85A30; transition: width 0.4s; }
-.bar-val { font-size: 12px; color: var(--color-text-tertiary); width: 56px; text-align: right; flex-shrink: 0; }
-.streak-row { display: flex; gap: 4px; margin-bottom: 1rem; flex-wrap: wrap; }
-.streak-day { width: 28px; height: 28px; border-radius: 5px; background: var(--color-background-secondary); display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--color-text-tertiary); }
-.streak-day.active { background: #D85A30; color: #fff; }
-.streak-day.today { border: 1.5px solid #D85A30; }
-
-/* History */
-.history-list { display: flex; flex-direction: column; gap: 6px; max-height: 420px; overflow-y: auto; }
-.history-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); }
-.history-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.history-info { flex: 1; }
-.history-proj { font-size: 13px; color: var(--color-text-primary); font-weight: 500; }
-.history-note { font-size: 11px; color: var(--color-text-secondary); }
-.history-meta { text-align: right; }
-.history-time { font-size: 12px; color: var(--color-text-secondary); }
-.history-dur { font-size: 11px; color: var(--color-text-tertiary); }
-.empty-state { text-align: center; padding: 2rem; color: var(--color-text-tertiary); font-size: 13px; }
-.toast { position: fixed; bottom: 20px; right: 20px; background: var(--color-text-primary); color: var(--color-background-primary); padding: 10px 16px; border-radius: var(--border-radius-md); font-size: 13px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999; }
-.toast.show { opacity: 1; }
-</style>
+<link rel="stylesheet" href="css/styles.css">
 
 <div id="app">
 <h2 class="sr-only">Pomodoro Tracker — Timer con proyectos, reportes e historial de sesiones</h2>
 
 <div class="tabs">
-  <button class="tab active" onclick="switchTab('timer')"><i class="ti ti-player-play" aria-hidden="true"></i> Timer</button>
-  <button class="tab" onclick="switchTab('stats')"><i class="ti ti-chart-bar" aria-hidden="true"></i> Reportes</button>
-  <button class="tab" onclick="switchTab('history')"><i class="ti ti-clock" aria-hidden="true"></i> Historial</button>
-  <button class="tab" onclick="switchTab('settings')"><i class="ti ti-settings" aria-hidden="true"></i> Config</button>
+  <button class="tab active"><i class="ti ti-player-play" aria-hidden="true"></i> Timer</button>
+  <button class="tab"><i class="ti ti-chart-bar" aria-hidden="true"></i> Reportes</button>
+  <button class="tab"><i class="ti ti-clock" aria-hidden="true"></i> Historial</button>
+  <button class="tab"><i class="ti ti-settings" aria-hidden="true"></i> Config</button>
 </div>
 
 <!-- TIMER TAB -->
@@ -94,15 +16,15 @@ input[type="text"] { width: 100%; font-family: var(--font-sans); font-size: 13px
     <div class="timer-card">
       <div class="timer-label" id="mode-label">Pomodoro</div>
       <div class="mode-btns">
-        <button class="mode-btn active" onclick="setMode('pomo')">Pomodoro</button>
-        <button class="mode-btn" onclick="setMode('short')">Descanso corto</button>
-        <button class="mode-btn" onclick="setMode('long')">Descanso largo</button>
+        <button class="mode-btn active">Pomodoro</button>
+        <button class="mode-btn">Descanso corto</button>
+        <button class="mode-btn">Descanso largo</button>
       </div>
       <div class="timer-display" id="timer-display">25:00</div>
       <div class="pomodoro-count" id="pom-dots"></div>
       <div class="timer-controls">
-        <button class="btn-main" id="start-btn" onclick="toggleTimer()">Iniciar</button>
-        <button class="btn-sec" onclick="resetTimer()" title="Reiniciar"><i class="ti ti-refresh" aria-label="Reiniciar"></i></button>
+        <button class="btn-main" id="start-btn">Iniciar</button>
+        <button class="btn-sec" id="reset-btn" title="Reiniciar">↺</button>
       </div>
       <div class="project-select-wrap">
         <label>Proyecto activo</label>
@@ -120,9 +42,18 @@ input[type="text"] { width: 100%; font-family: var(--font-sans); font-size: 13px
       <div class="panel-title">Proyectos</div>
       <div class="project-list" id="project-list"></div>
       <div class="add-project">
-        <input type="text" id="new-project-name" placeholder="Nuevo proyecto..." maxlength="30" onkeydown="if(event.key==='Enter') addProject()">
-        <button class="btn-add" onclick="addProject()"><i class="ti ti-plus" aria-hidden="true"></i> Agregar</button>
+        <input type="text" id="new-project-name" placeholder="Nuevo proyecto..." maxlength="30">
+        <button class="btn-add" id="add-project-btn"><i class="ti ti-plus" aria-hidden="true"></i> Agregar</button>
       </div>
+    </div>
+  </div>
+
+  <div class="tasks-section">
+    <div class="panel-title">Tareas de este pomodoro</div>
+    <div id="task-list" class="task-list"></div>
+    <div class="add-task">
+      <input type="text" id="new-task-input" placeholder="Agregar tarea..." maxlength="120">
+      <button class="btn-add" id="add-task-btn">+ Agregar</button>
     </div>
   </div>
 </div>
@@ -154,7 +85,7 @@ input[type="text"] { width: 100%; font-family: var(--font-sans); font-size: 13px
 <div id="tab-history" style="display:none;">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
     <div class="section-title" style="margin-bottom:0;">Sesiones completadas</div>
-    <button class="btn-sec" style="font-size:12px;" onclick="clearHistory()">Limpiar historial</button>
+    <button class="btn-sec" id="clear-history-btn" style="font-size:12px;">Limpiar historial</button>
   </div>
   <div class="history-list" id="history-list"></div>
 </div>
@@ -165,20 +96,20 @@ input[type="text"] { width: 100%; font-family: var(--font-sans); font-size: 13px
     <div class="panel-title">Duración de sesiones</div>
     <div style="display:flex;flex-direction:column;gap:1rem;margin-top:0.75rem;">
       <div>
-        <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin-bottom:4px;">Pomodoro (min)</label>
-        <input type="number" id="cfg-pomo" min="1" max="90" value="25" style="width:100px;" oninput="saveConfig()">
+        <label style="font-size:15px;color:var(--color-text-secondary);display:block;margin-bottom:4px;">Pomodoro (min)</label>
+        <input type="number" id="cfg-pomo" min="1" max="90" value="25" style="width:100px;">
       </div>
       <div>
-        <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin-bottom:4px;">Descanso corto (min)</label>
-        <input type="number" id="cfg-short" min="1" max="30" value="5" style="width:100px;" oninput="saveConfig()">
+        <label style="font-size:15px;color:var(--color-text-secondary);display:block;margin-bottom:4px;">Descanso corto (min)</label>
+        <input type="number" id="cfg-short" min="1" max="30" value="5" style="width:100px;">
       </div>
       <div>
-        <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin-bottom:4px;">Descanso largo (min)</label>
-        <input type="number" id="cfg-long" min="1" max="60" value="15" style="width:100px;" oninput="saveConfig()">
+        <label style="font-size:15px;color:var(--color-text-secondary);display:block;margin-bottom:4px;">Descanso largo (min)</label>
+        <input type="number" id="cfg-long" min="1" max="60" value="15" style="width:100px;">
       </div>
       <div>
-        <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin-bottom:4px;">Pomodoros antes del descanso largo</label>
-        <input type="number" id="cfg-cycle" min="2" max="8" value="4" style="width:100px;" oninput="saveConfig()">
+        <label style="font-size:15px;color:var(--color-text-secondary);display:block;margin-bottom:4px;">Pomodoros antes del descanso largo</label>
+        <input type="number" id="cfg-cycle" min="2" max="8" value="4" style="width:100px;">
       </div>
     </div>
     <div style="margin-top:1.5rem;">
@@ -192,391 +123,4 @@ input[type="text"] { width: 100%; font-family: var(--font-sans); font-size: 13px
 <div class="toast" id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script>
-const COLORS = ['#D85A30','#1D9E75','#378ADD','#BA7517','#993356','#3B6D11','#534AB7','#888780'];
-const KEY_PROJECTS = 'pomoprojects_v2';
-const KEY_HISTORY = 'pomohistory_v2';
-const KEY_CONFIG = 'pomoconfig_v2';
-
-let projects = [];
-let history = [];
-let config = { pomo: 25, short: 5, long: 15, cycle: 4 };
-let mode = 'pomo';
-let timerInterval = null;
-let secondsLeft = 25 * 60;
-let running = false;
-let pomoDoneToday = 0;
-let pomoCycleCount = 0;
-let dailyChart = null;
-
-function loadData() {
-  try { projects = JSON.parse(localStorage.getItem(KEY_PROJECTS)) || []; } catch(e) { projects = []; }
-  try { history = JSON.parse(localStorage.getItem(KEY_HISTORY)) || []; } catch(e) { history = []; }
-  try {
-    const c = JSON.parse(localStorage.getItem(KEY_CONFIG));
-    if (c) config = { ...config, ...c };
-  } catch(e) {}
-  if (!projects.length) {
-    projects = [
-      { id: 'p1', name: 'ReplyFast', color: COLORS[0] },
-      { id: 'p2', name: 'Universidad', color: COLORS[1] },
-      { id: 'p3', name: 'Contenido', color: COLORS[2] },
-    ];
-    saveProjects();
-  }
-}
-
-function saveProjects() { localStorage.setItem(KEY_PROJECTS, JSON.stringify(projects)); }
-function saveHistory() { localStorage.setItem(KEY_HISTORY, JSON.stringify(history)); }
-function saveConfig() {
-  config.pomo = parseInt(document.getElementById('cfg-pomo').value) || 25;
-  config.short = parseInt(document.getElementById('cfg-short').value) || 5;
-  config.long = parseInt(document.getElementById('cfg-long').value) || 15;
-  config.cycle = parseInt(document.getElementById('cfg-cycle').value) || 4;
-  localStorage.setItem(KEY_CONFIG, JSON.stringify(config));
-  if (!running) resetTimer();
-}
-
-function switchTab(t) {
-  ['timer','stats','history','settings'].forEach(n => {
-    document.getElementById('tab-' + n).style.display = n === t ? '' : 'none';
-    document.querySelectorAll('.tab')[['timer','stats','history','settings'].indexOf(n)].classList.toggle('active', n === t);
-  });
-  if (t === 'stats') renderStats();
-  if (t === 'history') renderHistory();
-  if (t === 'settings') renderSettings();
-}
-
-function getModeSecs() {
-  if (mode === 'pomo') return config.pomo * 60;
-  if (mode === 'short') return config.short * 60;
-  return config.long * 60;
-}
-
-function setMode(m) {
-  mode = m;
-  document.querySelectorAll('.mode-btn').forEach((b, i) => b.classList.toggle('active', ['pomo','short','long'][i] === m));
-  document.getElementById('mode-label').textContent = { pomo: 'Pomodoro', short: 'Descanso corto', long: 'Descanso largo' }[m];
-  resetTimer();
-}
-
-function formatTime(s) {
-  const m = Math.floor(s / 60);
-  const sec = s % 60;
-  return String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
-}
-
-function updateDisplay() {
-  document.getElementById('timer-display').textContent = formatTime(secondsLeft);
-  document.title = formatTime(secondsLeft) + ' | Pomodoro';
-}
-
-function renderDots() {
-  const cycle = config.cycle || 4;
-  let html = '';
-  for (let i = 0; i < cycle; i++) {
-    html += `<div class="pom-dot ${i < pomoCycleCount ? 'done' : ''}"></div>`;
-  }
-  document.getElementById('pom-dots').innerHTML = html;
-}
-
-function toggleTimer() {
-  if (running) {
-    clearInterval(timerInterval);
-    running = false;
-    document.getElementById('start-btn').textContent = 'Continuar';
-  } else {
-    running = true;
-    document.getElementById('start-btn').textContent = 'Pausar';
-    timerInterval = setInterval(() => {
-      secondsLeft--;
-      updateDisplay();
-      if (secondsLeft <= 0) {
-        clearInterval(timerInterval);
-        running = false;
-        onTimerEnd();
-      }
-    }, 1000);
-  }
-}
-
-function resetTimer() {
-  clearInterval(timerInterval);
-  running = false;
-  secondsLeft = getModeSecs();
-  document.getElementById('start-btn').textContent = 'Iniciar';
-  updateDisplay();
-}
-
-function onTimerEnd() {
-  if (mode === 'pomo') {
-    const pid = document.getElementById('active-project').value;
-    const note = document.getElementById('session-note').value.trim();
-    const proj = projects.find(p => p.id === pid);
-    const entry = {
-      id: Date.now(),
-      projectId: pid || null,
-      projectName: proj ? proj.name : 'Sin proyecto',
-      projectColor: proj ? proj.color : '#888',
-      note: note,
-      duration: config.pomo,
-      ts: Date.now()
-    };
-    history.unshift(entry);
-    saveHistory();
-    pomoCycleCount++;
-    pomoDoneToday++;
-    if (pomoCycleCount >= config.cycle) {
-      pomoCycleCount = 0;
-      showToast('¡Ciclo completo! Tomá un descanso largo.');
-      setMode('long');
-    } else {
-      showToast('¡Pomodoro completado! Descansá un poco.');
-      setMode('short');
-    }
-    renderDots();
-    document.getElementById('session-note').value = '';
-  } else {
-    showToast('¡Descanso terminado! A trabajar.');
-    setMode('pomo');
-  }
-  try { new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAA').play(); } catch(e) {}
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-function renderProjects() {
-  const list = document.getElementById('project-list');
-  const sel = document.getElementById('active-project');
-  const cur = sel.value;
-  list.innerHTML = '';
-  sel.innerHTML = '<option value="">— Sin proyecto —</option>';
-  projects.forEach(p => {
-    const poms = history.filter(h => h.projectId === p.id).length;
-    list.innerHTML += `<div class="project-item" onclick="selectProject('${p.id}')" id="pi-${p.id}">
-      <div class="project-dot" style="background:${p.color}"></div>
-      <span class="project-name">${p.name}</span>
-      <span class="project-poms">${poms} 🍅</span>
-    </div>`;
-    sel.innerHTML += `<option value="${p.id}" ${p.id === cur ? 'selected' : ''}>${p.name}</option>`;
-  });
-  if (cur) sel.value = cur;
-}
-
-function selectProject(id) {
-  document.getElementById('active-project').value = id;
-  document.querySelectorAll('.project-item').forEach(el => el.classList.remove('selected'));
-  const el = document.getElementById('pi-' + id);
-  if (el) el.classList.add('selected');
-}
-
-function addProject() {
-  const inp = document.getElementById('new-project-name');
-  const name = inp.value.trim();
-  if (!name) return;
-  const id = 'p' + Date.now();
-  const color = COLORS[projects.length % COLORS.length];
-  projects.push({ id, name, color });
-  saveProjects();
-  inp.value = '';
-  renderProjects();
-}
-
-function deleteProject(id) {
-  if (!confirm('¿Eliminar este proyecto? El historial se conserva.')) return;
-  projects = projects.filter(p => p.id !== id);
-  saveProjects();
-  renderProjects();
-  renderSettings();
-}
-
-function getWeekStart() {
-  const d = new Date();
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  const m = new Date(d.setDate(diff));
-  m.setHours(0,0,0,0);
-  return m.getTime();
-}
-
-function renderStats() {
-  const weekStart = getWeekStart();
-  const weekHistory = history.filter(h => h.ts >= weekStart);
-  const todayStart = new Date(); todayStart.setHours(0,0,0,0);
-  const todayHistory = history.filter(h => h.ts >= todayStart.getTime());
-
-  const totalPoms = history.length;
-  const weekPoms = weekHistory.length;
-  const todayPoms = todayHistory.length;
-  const totalHours = (totalPoms * (config.pomo || 25) / 60).toFixed(1);
-  const weekHours = (weekPoms * (config.pomo || 25) / 60).toFixed(1);
-
-  const streak = calcStreak();
-
-  document.getElementById('stats-grid').innerHTML = `
-    <div class="metric-card"><div class="metric-label">Hoy</div><div class="metric-value">${todayPoms}</div><div class="metric-sub">pomodoros</div></div>
-    <div class="metric-card"><div class="metric-label">Esta semana</div><div class="metric-value">${weekHours}h</div><div class="metric-sub">${weekPoms} sesiones</div></div>
-    <div class="metric-card"><div class="metric-label">Total acumulado</div><div class="metric-value">${totalHours}h</div><div class="metric-sub">${totalPoms} sesiones</div></div>
-    <div class="metric-card"><div class="metric-label">Racha actual</div><div class="metric-value">${streak}</div><div class="metric-sub">días consecutivos</div></div>
-  `;
-
-  const byProjWeek = {};
-  const byProjTotal = {};
-  projects.forEach(p => { byProjWeek[p.id] = 0; byProjTotal[p.id] = 0; });
-  history.forEach(h => {
-    if (h.projectId) {
-      if (!byProjTotal[h.projectId]) byProjTotal[h.projectId] = 0;
-      byProjTotal[h.projectId]++;
-      if (h.ts >= weekStart) {
-        if (!byProjWeek[h.projectId]) byProjWeek[h.projectId] = 0;
-        byProjWeek[h.projectId]++;
-      }
-    }
-  });
-
-  const renderBars = (obj, container) => {
-    const entries = Object.entries(obj).filter(([id]) => projects.find(p => p.id === id));
-    const maxVal = Math.max(...entries.map(([,v]) => v), 1);
-    const mins = config.pomo || 25;
-    container.innerHTML = entries.sort((a,b)=>b[1]-a[1]).map(([id, poms]) => {
-      const p = projects.find(pr => pr.id === id);
-      if (!p) return '';
-      const hrs = (poms * mins / 60).toFixed(1);
-      const pct = Math.round((poms / maxVal) * 100);
-      return `<div class="bar-row">
-        <div class="bar-name">${p.name}</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${p.color}"></div></div>
-        <div class="bar-val">${hrs}h</div>
-      </div>`;
-    }).join('');
-    if (!entries.length) container.innerHTML = '<div class="empty-state">Sin datos aún</div>';
-  };
-
-  renderBars(byProjWeek, document.getElementById('weekly-bars'));
-  renderBars(byProjTotal, document.getElementById('total-bars'));
-
-  const last21 = [];
-  for (let i = 20; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    d.setHours(0,0,0,0);
-    const next = new Date(d); next.setDate(next.getDate() + 1);
-    const hasWork = history.some(h => h.ts >= d.getTime() && h.ts < next.getTime());
-    const isToday = i === 0;
-    const label = ['D','L','M','X','J','V','S'][d.getDay()];
-    last21.push({ hasWork, isToday, label });
-  }
-  document.getElementById('streak-row').innerHTML = last21.map(d =>
-    `<div class="streak-day ${d.hasWork ? 'active' : ''} ${d.isToday ? 'today' : ''}" title="${d.label}">${d.label}</div>`
-  ).join('');
-
-  const dayLabels = [];
-  const dayData = [];
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    d.setHours(0,0,0,0);
-    const next = new Date(d); next.setDate(next.getDate() + 1);
-    const poms = history.filter(h => h.ts >= d.getTime() && h.ts < next.getTime()).length;
-    dayLabels.push(['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][d.getDay()]);
-    dayData.push(+(poms * (config.pomo||25) / 60).toFixed(2));
-  }
-  if (dailyChart) { dailyChart.destroy(); dailyChart = null; }
-  const ctx = document.getElementById('daily-chart');
-  if (ctx) {
-    dailyChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: dayLabels,
-        datasets: [{
-          label: 'Horas',
-          data: dayData,
-          backgroundColor: '#D85A3055',
-          borderColor: '#D85A30',
-          borderWidth: 1.5,
-          borderRadius: 4,
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: { beginAtZero: true, grid: { color: 'rgba(128,128,128,0.1)' }, ticks: { font: { size: 11 }, callback: v => v + 'h' } },
-          x: { grid: { display: false }, ticks: { font: { size: 11 }, autoSkip: false } }
-        }
-      }
-    });
-  }
-}
-
-function calcStreak() {
-  let streak = 0;
-  const today = new Date(); today.setHours(0,0,0,0);
-  for (let i = 0; i < 365; i++) {
-    const d = new Date(today); d.setDate(d.getDate() - i);
-    const next = new Date(d); next.setDate(next.getDate() + 1);
-    const hasWork = history.some(h => h.ts >= d.getTime() && h.ts < next.getTime());
-    if (hasWork) streak++;
-    else if (i > 0) break;
-  }
-  return streak;
-}
-
-function renderHistory() {
-  const list = document.getElementById('history-list');
-  if (!history.length) {
-    list.innerHTML = '<div class="empty-state">No hay sesiones aún.<br>¡Completá tu primer pomodoro!</div>';
-    return;
-  }
-  list.innerHTML = history.slice(0, 100).map(h => {
-    const d = new Date(h.ts);
-    const dateStr = d.toLocaleDateString('es-CO', { day: '2-digit', month: 'short' });
-    const timeStr = d.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
-    return `<div class="history-item">
-      <div class="history-dot" style="background:${h.projectColor}"></div>
-      <div class="history-info">
-        <div class="history-proj">${h.projectName}</div>
-        ${h.note ? `<div class="history-note">${h.note}</div>` : ''}
-      </div>
-      <div class="history-meta">
-        <div class="history-time">${dateStr} · ${timeStr}</div>
-        <div class="history-dur">${h.duration || config.pomo} min</div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function clearHistory() {
-  if (!confirm('¿Borrar todo el historial de sesiones?')) return;
-  history = [];
-  saveHistory();
-  renderHistory();
-  showToast('Historial borrado');
-}
-
-function renderSettings() {
-  document.getElementById('cfg-pomo').value = config.pomo;
-  document.getElementById('cfg-short').value = config.short;
-  document.getElementById('cfg-long').value = config.long;
-  document.getElementById('cfg-cycle').value = config.cycle;
-  const mp = document.getElementById('manage-projects');
-  mp.innerHTML = projects.map(p =>
-    `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary);">
-      <div style="width:8px;height:8px;border-radius:50%;background:${p.color};flex-shrink:0;"></div>
-      <span style="flex:1;font-size:13px;color:var(--color-text-primary);">${p.name}</span>
-      <button class="btn-sec" style="font-size:11px;padding:4px 8px;" onclick="deleteProject('${p.id}')"><i class="ti ti-trash" aria-hidden="true"></i></button>
-    </div>`
-  ).join('');
-}
-
-loadData();
-secondsLeft = getModeSecs();
-updateDisplay();
-renderProjects();
-renderDots();
-</script>
+<script type="module" src="js/main.js"></script>

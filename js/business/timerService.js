@@ -1,3 +1,17 @@
+function playAlarm() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.frequency.value = 880;
+  osc.type = 'sine';
+  gain.gain.setValueAtTime(0.6, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.5);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 1.5);
+}
+
 let mode = 'pomo';
 let secondsLeft = 0;
 let running = false;
@@ -41,6 +55,7 @@ export function toggle(config, onTick, onEnd) {
       clearInterval(timerInterval);
       timerInterval = null;
       running = false;
+      playAlarm();
       onEnd(mode);
     } else {
       onTick(secondsLeft, mode);

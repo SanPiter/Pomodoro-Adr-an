@@ -156,7 +156,6 @@ function onTimerEnd(endedMode) {
     updateDisplay(timerSvc.getState().secondsLeft, 'pomo');
   }
   document.getElementById('start-btn').textContent = 'Iniciar';
-  try { new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAA').play(); } catch {}
 }
 
 function onToggleTask(id) {

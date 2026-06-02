@@ -133,3 +133,11 @@ input[type="text"] { width: 100%; font-family: var(--font-sans); font-size: 16px
 
 .toast { position: fixed; bottom: 20px; right: 20px; background: var(--color-text-primary); color: var(--color-background-primary); padding: 10px 16px; border-radius: var(--border-radius-md); font-size: 13px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999; }
 .toast.show { opacity: 1; }
+
+/* Leyenda del gráfico diario */
+.chart-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font-size: 0.78rem; color: var(--color-text-secondary); }
+.legend-item { display: flex; align-items: center; gap: 5px; }
+.legend-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+/* Badge de sesión parcial en historial */
+.session-badge-partial { font-size: 0.68rem; font-style: italic; color: var(--color-text-tertiary); border: 1px solid var(--color-text-tertiary); border-radius: 4px; padding: 1px 5px; margin-left: 6px; vertical-align: middle; }

@@ -1,4 +1,4 @@
-export function createSession({ projectId, projectName, projectColor, note, duration }) {
+export function createSession({ projectId, projectName, projectColor, note, duration, tipo }) {
   const now = Date.now();
   return {
     id: now,
@@ -7,6 +7,7 @@ export function createSession({ projectId, projectName, projectColor, note, dura
     projectColor,
     note,
     duration,
+    tipo: tipo || 'completa',
     ts: now,
   };
 }

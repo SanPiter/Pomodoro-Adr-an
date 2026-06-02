@@ -58,13 +58,48 @@ export function getLast7DaysHours(history, pomoDuration) {
 }
 
 export function aggregateByProject(history, projects, filterFn) {
-  const counts = {};
-  projects.forEach(p => { counts[p.id] = 0; });
+  const durations = {};
+  projects.forEach(p => { durations[p.id] = 0; });
   (filterFn ? history.filter(filterFn) : history).forEach(h => {
     if (h.projectId) {
-      if (counts[h.projectId] === undefined) counts[h.projectId] = 0;
-      counts[h.projectId]++;
+      if (durations[h.projectId] === undefined) durations[h.projectId] = 0;
+      durations[h.projectId] += h.duration || 25;
     }
   });
-  return counts;
+  return durations;
+}
+
+export function getLast7DaysHoursByProject(history, projects) {
+  const labels = [];
+  const dayRanges = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    d.setHours(0, 0, 0, 0);
+    const next = new Date(d);
+    next.setDate(next.getDate() + 1);
+    labels.push(['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'][d.getDay()]);
+    dayRanges.push({ from: d.getTime(), to: next.getTime() });
+  }
+
+  const weekHistory = history.filter(h => h.ts >= dayRanges[0].from && h.ts < dayRanges[dayRanges.length - 1].to);
+  const projectMap = new Map();
+
+  weekHistory.forEach(h => {
+    const pid = h.projectId || 'none';
+    if (!projectMap.has(pid)) {
+      projectMap.set(pid, {
+        projectId: pid === 'none' ? null : pid,
+        projectName: h.projectName || 'Sin proyecto',
+        color: h.projectColor || '#888888',
+        hours: [0, 0, 0, 0, 0, 0, 0],
+      });
+    }
+    const dayIdx = dayRanges.findIndex(r => h.ts >= r.from && h.ts < r.to);
+    if (dayIdx >= 0) {
+      projectMap.get(pid).hours[dayIdx] += (h.duration || 25) / 60;
+    }
+  });
+
+  return { labels, projectData: Array.from(projectMap.values()) };
 }

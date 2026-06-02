@@ -58,6 +58,7 @@ document.getElementById('start-btn').addEventListener('click', () => {
 });
 
 document.getElementById('reset-btn').addEventListener('click', () => {
+  savePartialIfNeeded();
   timerSvc.reset(config);
   updateDisplay(timerSvc.getState().secondsLeft, timerSvc.getState().mode);
   document.getElementById('start-btn').textContent = 'Iniciar';
@@ -189,3 +190,29 @@ function onConfigChange() {
   }
   renderDots(timerSvc.getState().pomoCycleCount, config.cycle);
 }
+
+function savePartialIfNeeded() {
+  const { mode, secondsLeft, running } = timerSvc.getState();
+  if (mode !== 'pomo') return;
+  const totalSecs = config.pomo * 60;
+  if (secondsLeft === totalSecs) return;
+  const elapsedSecs = totalSecs - secondsLeft;
+  if (elapsedSecs <= 60) return;
+  const pid = document.getElementById('active-project').value;
+  const note = document.getElementById('session-note').value.trim();
+  const proj = projects.find(p => p.id === pid);
+  const entry = createSession({
+    projectId: pid,
+    projectName: proj ? proj.name : 'Sin proyecto',
+    projectColor: proj ? proj.color : '#888780',
+    note,
+    duration: +(elapsedSecs / 60).toFixed(2),
+    tipo: 'parcial',
+  });
+  history.unshift(entry);
+  saveHistory(history);
+}
+
+window.addEventListener('beforeunload', () => {
+  savePartialIfNeeded();
+});

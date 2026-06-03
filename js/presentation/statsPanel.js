@@ -127,7 +127,14 @@ function renderHorizontalChart(containerId, existingChart, durations, projects) 
       indexAxis: 'y',
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: c => fmtHours(c.parsed.x),
+          },
+        },
+      },
       scales: {
         x: { beginAtZero: true, grid: { color: 'rgba(128,128,128,0.1)' }, ticks: { font: { size: 11 }, callback: v => fmtHours(v) } },
         y: { grid: { display: false }, ticks: { font: { size: 11 } } },

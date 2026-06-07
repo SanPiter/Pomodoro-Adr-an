@@ -7,124 +7,166 @@ import { switchTab, showToast, updateDisplay, updateModeUI } from './presentatio
 import { renderDots, renderProjects, selectProject, renderTasks } from './presentation/timerPanel.js';
 import { renderStats, renderHistory } from './presentation/statsPanel.js';
 import { renderSettings } from './presentation/settingsPanel.js';
+import { getSession } from './auth/auth.js';
+import { showAuthScreen, hideAuthScreen } from './auth/authUI.js';
+import { migrateFromLocalStorage } from './auth/migration.js';
+import { signOut } from './auth/auth.js';
 
-// --- State ---
-let projects = loadProjects();
-let history = loadHistory();
-let config = loadConfig();
-let tasks = loadTasks();
+// ─── State ────────────────────────────────────────────────────────────────────
+let projects = [];
+let history  = [];
+let config   = {};
+let tasks    = [];
 
-if (!projects.length) {
-  projects = getDefaultProjects();
-  saveProjects(projects);
+// ─── Auth gate ────────────────────────────────────────────────────────────────
+const { data: { session } } = await getSession();
+if (session) {
+  hideAuthScreen();
+  await initApp(session.user.id);
+} else {
+  showAuthScreen(initApp);
 }
 
-// --- Init ---
-timerSvc.init(config);
-updateDisplay(timerSvc.getState().secondsLeft, timerSvc.getState().mode);
-updateModeUI('pomo');
-renderProjects(projects, history);
-renderDots(timerSvc.getState().pomoCycleCount, config.cycle);
-renderTasks(tasks, onToggleTask, onDeleteTask);
+// ─── initApp ─────────────────────────────────────────────────────────────────
+async function initApp(userId) {
+  await migrateFromLocalStorage(userId);
 
-// --- Tab switching ---
-const TABS = ['timer', 'stats', 'history', 'settings'];
-document.querySelectorAll('.tab').forEach((btn, i) => {
-  btn.addEventListener('click', () => {
-    switchTab(TABS[i], {
-      stats: () => renderStats(history, projects, config),
-      history: () => renderHistory(history, config),
-      settings: () => renderSettings(config, projects, onDeleteProject),
+  [projects, history, config, tasks] = await Promise.all([
+    loadProjects(), loadHistory(), loadConfig(), loadTasks(),
+  ]);
+
+  if (!projects.length) {
+    projects = getDefaultProjects();
+    await saveProjects(projects);
+  }
+
+  // Render inicial
+  timerSvc.init(config);
+  updateDisplay(timerSvc.getState().secondsLeft, timerSvc.getState().mode);
+  updateModeUI('pomo');
+  renderProjects(projects, history);
+  renderDots(timerSvc.getState().pomoCycleCount, config.cycle);
+  renderTasks(tasks, onToggleTask, onDeleteTask);
+
+  registerListeners();
+}
+
+// ─── Listeners (se registran una sola vez tras el login) ─────────────────────
+function registerListeners() {
+  // Tab switching
+  const TABS = ['timer', 'stats', 'history', 'settings'];
+  document.querySelectorAll('.tab').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      switchTab(TABS[i], {
+        stats:    () => renderStats(history, projects, config),
+        history:  () => renderHistory(history, config),
+        settings: () => renderSettings(config, projects, onDeleteProject),
+      });
     });
   });
-});
 
-// --- Mode buttons ---
-const MODES = ['pomo', 'short', 'long'];
-document.querySelectorAll('.mode-btn').forEach((btn, i) => {
-  btn.addEventListener('click', () => {
-    timerSvc.changeMode(MODES[i], config);
-    updateModeUI(MODES[i]);
-    updateDisplay(timerSvc.getState().secondsLeft, MODES[i]);
+  // Mode buttons
+  const MODES = ['pomo', 'short', 'long'];
+  document.querySelectorAll('.mode-btn').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      timerSvc.changeMode(MODES[i], config);
+      updateModeUI(MODES[i]);
+      updateDisplay(timerSvc.getState().secondsLeft, MODES[i]);
+      document.getElementById('start-btn').textContent = 'Iniciar';
+    });
+  });
+
+  // Timer controls
+  document.getElementById('start-btn').addEventListener('click', () => {
+    timerSvc.toggle(config, onTick, onTimerEnd);
+    const btn = document.getElementById('start-btn');
+    btn.textContent = timerSvc.getState().running ? 'Pausar' : 'Continuar';
+  });
+
+  document.getElementById('reset-btn').addEventListener('click', () => {
+    savePartialIfNeeded();
+    timerSvc.reset(config);
+    updateDisplay(timerSvc.getState().secondsLeft, timerSvc.getState().mode);
     document.getElementById('start-btn').textContent = 'Iniciar';
   });
-});
 
-// --- Timer controls ---
-document.getElementById('start-btn').addEventListener('click', () => {
-  timerSvc.toggle(config, onTick, onTimerEnd);
-  const btn = document.getElementById('start-btn');
-  btn.textContent = timerSvc.getState().running ? 'Pausar' : 'Continuar';
-});
+  // Project list (event delegation)
+  document.getElementById('project-list').addEventListener('click', e => {
+    const item = e.target.closest('.project-item');
+    if (item) selectProject(item.dataset.id);
+  });
 
-document.getElementById('reset-btn').addEventListener('click', () => {
-  savePartialIfNeeded();
-  timerSvc.reset(config);
-  updateDisplay(timerSvc.getState().secondsLeft, timerSvc.getState().mode);
-  document.getElementById('start-btn').textContent = 'Iniciar';
-});
+  // Add project
+  document.getElementById('add-project-btn').addEventListener('click', addProjectHandler);
+  document.getElementById('new-project-name').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addProjectHandler();
+  });
 
-// --- Project list (event delegation) ---
-document.getElementById('project-list').addEventListener('click', e => {
-  const item = e.target.closest('.project-item');
-  if (item) selectProject(item.dataset.id);
-});
+  // Settings: config inputs (debounced)
+  let configDebounce = null;
+  ['cfg-pomo', 'cfg-short', 'cfg-long', 'cfg-cycle'].forEach(id => {
+    document.getElementById(id).addEventListener('input', () => {
+      clearTimeout(configDebounce);
+      configDebounce = setTimeout(onConfigChange, 300);
+    });
+  });
 
-// --- Add project ---
-function addProjectHandler() {
+  // Tasks
+  document.getElementById('add-task-btn').addEventListener('click', addTaskHandler);
+  document.getElementById('new-task-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addTaskHandler();
+  });
+
+  // History: clear
+  document.getElementById('clear-history-btn').addEventListener('click', async () => {
+    if (!confirm('¿Borrar todo el historial de sesiones?')) return;
+    history = [];
+    await saveHistory(history);
+    renderHistory(history, config);
+    showToast('Historial borrado');
+  });
+
+  // Sign out
+  const signOutBtn = document.getElementById('sign-out-btn');
+  if (signOutBtn) signOutBtn.addEventListener('click', async () => {
+    await signOut();
+    window.location.reload();
+  });
+
+  window.addEventListener('beforeunload', () => {
+    savePartialIfNeeded(); // fire-and-forget en beforeunload
+  });
+}
+
+// ─── Handlers ─────────────────────────────────────────────────────────────────
+async function addProjectHandler() {
   const inp = document.getElementById('new-project-name');
   const name = inp.value.trim();
   if (!name) return;
   try {
     const project = svcAddProject(name, projects);
     projects.push(project);
-    saveProjects(projects);
+    await saveProjects(projects);
     inp.value = '';
     renderProjects(projects, history);
   } catch {}
 }
 
-document.getElementById('add-project-btn').addEventListener('click', addProjectHandler);
-document.getElementById('new-project-name').addEventListener('keydown', e => {
-  if (e.key === 'Enter') addProjectHandler();
-});
-
-// --- Settings: config inputs ---
-['cfg-pomo', 'cfg-short', 'cfg-long', 'cfg-cycle'].forEach(id => {
-  document.getElementById(id).addEventListener('input', onConfigChange);
-});
-
-// --- Tasks ---
-function addTaskHandler() {
+async function addTaskHandler() {
   const inp = document.getElementById('new-task-input');
   const text = inp.value.trim();
   if (!text) return;
   tasks.push(createTask(text));
-  saveTasks(tasks);
+  await saveTasks(tasks);
   inp.value = '';
   renderTasks(tasks, onToggleTask, onDeleteTask);
 }
 
-document.getElementById('add-task-btn').addEventListener('click', addTaskHandler);
-document.getElementById('new-task-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') addTaskHandler();
-});
-
-// --- History: clear ---
-document.getElementById('clear-history-btn').addEventListener('click', () => {
-  if (!confirm('¿Borrar todo el historial de sesiones?')) return;
-  history = [];
-  saveHistory(history);
-  renderHistory(history, config);
-  showToast('Historial borrado');
-});
-
-// --- Handlers ---
 function onTick(secondsLeft, mode) {
   updateDisplay(secondsLeft, mode);
 }
 
-function onTimerEnd(endedMode) {
+async function onTimerEnd(endedMode) {
   if (endedMode === 'pomo') {
     const pid = document.getElementById('active-project').value;
     const note = document.getElementById('session-note').value.trim();
@@ -137,7 +179,7 @@ function onTimerEnd(endedMode) {
       duration: config.pomo,
     });
     history.unshift(entry);
-    saveHistory(history);
+    await saveHistory(history);
     document.getElementById('session-note').value = '';
 
     const result = timerSvc.advancePomo(config);
@@ -148,7 +190,7 @@ function onTimerEnd(endedMode) {
     updateDisplay(timerSvc.getState().secondsLeft, result.nextMode);
     renderDots(timerSvc.getState().pomoCycleCount, config.cycle);
     tasks = tasks.filter(t => !t.done);
-    saveTasks(tasks);
+    await saveTasks(tasks);
     renderTasks(tasks, onToggleTask, onDeleteTask);
   } else {
     timerSvc.advanceBreak(config);
@@ -159,31 +201,31 @@ function onTimerEnd(endedMode) {
   document.getElementById('start-btn').textContent = 'Iniciar';
 }
 
-function onToggleTask(id) {
+async function onToggleTask(id) {
   const t = tasks.find(t => t.id === id);
-  if (t) { t.done = !t.done; saveTasks(tasks); renderTasks(tasks, onToggleTask, onDeleteTask); }
+  if (t) { t.done = !t.done; await saveTasks(tasks); renderTasks(tasks, onToggleTask, onDeleteTask); }
 }
 
-function onDeleteTask(id) {
+async function onDeleteTask(id) {
   tasks = tasks.filter(t => t.id !== id);
-  saveTasks(tasks);
+  await saveTasks(tasks);
   renderTasks(tasks, onToggleTask, onDeleteTask);
 }
 
-function onDeleteProject(id) {
+async function onDeleteProject(id) {
   if (!confirm('¿Eliminar este proyecto? El historial se conserva.')) return;
   projects = svcDeleteProject(id, projects);
-  saveProjects(projects);
+  await saveProjects(projects);
   renderProjects(projects, history);
   renderSettings(config, projects, onDeleteProject);
 }
 
-function onConfigChange() {
-  config.pomo = parseInt(document.getElementById('cfg-pomo').value) || 25;
+async function onConfigChange() {
+  config.pomo  = parseInt(document.getElementById('cfg-pomo').value)  || 25;
   config.short = parseInt(document.getElementById('cfg-short').value) || 5;
-  config.long = parseInt(document.getElementById('cfg-long').value) || 15;
+  config.long  = parseInt(document.getElementById('cfg-long').value)  || 15;
   config.cycle = parseInt(document.getElementById('cfg-cycle').value) || 4;
-  persistConfig(config);
+  await persistConfig(config);
   if (!timerSvc.getState().running) {
     timerSvc.reset(config);
     updateDisplay(timerSvc.getState().secondsLeft, timerSvc.getState().mode);
@@ -191,8 +233,8 @@ function onConfigChange() {
   renderDots(timerSvc.getState().pomoCycleCount, config.cycle);
 }
 
-function savePartialIfNeeded() {
-  const { mode, secondsLeft, running } = timerSvc.getState();
+async function savePartialIfNeeded() {
+  const { mode, secondsLeft } = timerSvc.getState();
   if (mode !== 'pomo') return;
   const totalSecs = config.pomo * 60;
   if (secondsLeft === totalSecs) return;
@@ -210,9 +252,5 @@ function savePartialIfNeeded() {
     tipo: 'parcial',
   });
   history.unshift(entry);
-  saveHistory(history);
+  await saveHistory(history);
 }
-
-window.addEventListener('beforeunload', () => {
-  savePartialIfNeeded();
-});

@@ -1,6 +1,7 @@
 <link rel="stylesheet" href="css/styles.css">
 
-<div id="app">
+<div id="auth-screen"></div>
+<div id="app" style="display:none;">
 <h2 class="sr-only">Pomodoro Tracker — Timer con proyectos, reportes e historial de sesiones</h2>
 
 <div class="tabs">
@@ -117,11 +118,17 @@
       <div class="panel-title">Gestionar proyectos</div>
       <div id="manage-projects" style="margin-top:0.75rem;display:flex;flex-direction:column;gap:6px;"></div>
     </div>
+    <div style="margin-top:2rem;border-top:0.5px solid var(--color-border-tertiary);padding-top:1.5rem;">
+      <div class="panel-title">Cuenta</div>
+      <button class="btn-sec" id="sign-out-btn" style="margin-top:0.75rem;width:100%;text-align:center;">Cerrar sesión</button>
+    </div>
   </div>
 </div>
 
 </div>
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script type="module" src="js/main.js"></script>

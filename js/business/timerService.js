@@ -49,14 +49,14 @@ export function toggle(config, onTick, onEnd) {
     return;
   }
   running = true;
-  timerInterval = setInterval(() => {
+  timerInterval = setInterval(async () => {
     secondsLeft--;
     if (secondsLeft <= 0) {
       clearInterval(timerInterval);
       timerInterval = null;
       running = false;
       playAlarm();
-      onEnd(mode);
+      await onEnd(mode);
     } else {
       onTick(secondsLeft, mode);
     }
